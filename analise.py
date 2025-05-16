@@ -4,8 +4,6 @@ import re
 from matplotlib.colors import hsv_to_rgb
 import numpy as np
 
-
-# Paste your clustering output here
 raw_output = ""
 with open("output.txt", "r") as file:
     raw_output = file.read()
@@ -68,11 +66,9 @@ def plot_clusters(title, filename, all_points, clusters, outliers):
     plt.close()
     print(f"Saved: {filename}")
 
-# === Extract all data points
 data_section = re.search(r"Data points:(.*?)(Naive KMeans|Kmeans plus plus|dbscan)", raw_output, re.DOTALL | re.IGNORECASE)
 all_points = extract_points(data_section.group(1)) if data_section else []
 
-# === Extract each clustering algorithm
 clustering_algos = [
     ("Naive KMeans", "naive_kmeans.png"),
     ("Kmeans plus plus", "kmeans_plus_plus.png"),

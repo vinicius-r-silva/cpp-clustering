@@ -25,17 +25,20 @@ int main() {
   logger::print(data);
   std::cout << std::endl;
 
-  clusterization_result naive_kmeans_result = naive_kmeans.calculate(data); // Fit the kmeans model to the data
+  distance_metric metric = EUCLIDEAN;
+  // distance_metric metric = COSINE;
+
+  clusterization_result naive_kmeans_result = naive_kmeans.calculate(data);
   std::cout << "Naive KMeans Clusters:" << std::endl;
   logger::print(naive_kmeans_result);
 
   std::cout << "Kmeans plus plus Clusters:" << std::endl;
-  clusterization_result kmeans_plus_plus_result = kmeans_plus_plus.calculate(data); // Fit the kmeans model to the data
+  clusterization_result kmeans_plus_plus_result = kmeans_plus_plus.calculate(data);
   logger::print(kmeans_plus_plus_result);
   std::cout << std::endl;
 
   std::cout << "dbscan Clusters:" << std::endl;
-  clusterization_result dbscan_result = dbscan.calculate(data); // Fit the kmeans model to the data
+  clusterization_result dbscan_result = dbscan.calculate(data);
   logger::print(dbscan_result);
   std::cout << std::endl;
 
