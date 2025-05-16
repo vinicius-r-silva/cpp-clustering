@@ -83,21 +83,17 @@ std::vector<datapoint> input_generator::generate_cosine_clusters(int n, int d, i
     k = rand() % ((int)std::sqrt(n));
   }
 
-  // Step 1: Generate k random directions (unit vectors)
   for (int i = 0; i < k; ++i)
     directions.push_back(random_unit_vector(d));
 
-  // Step 2: Generate points around each direction
   for (int i = 0; i < n; ++i) {
     const datapoint &dir = directions[i % k];
     datapoint point(d);
 
     for (int j = 0; j < d; ++j) {
-      // Small noise perpendicular to the direction vector
       point[j] = dir[j] + angle_noise * ((double(rand()) / RAND_MAX) - 0.5);
     }
 
-    // Step 3: Normalize to unit vector
     normalize_vector(point);
     data.push_back(point);
   }

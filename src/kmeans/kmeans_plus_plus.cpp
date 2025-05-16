@@ -93,8 +93,6 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
 
 clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &data, distance_metric distance_metric) {
   evaluation_metric evaluation_metric = evaluation_metric::WITHIN_CLUSTER_SUM_OF_SQUARES;
-  // std::unordered_map<int, double> k_to_score_map;
-  // std::unordered_map<int, std::vector<cluster>> k_to_cluster_map;
 
   const int initial_k = 1;
   const int max_k = std::sqrt(data.size() / 2);
@@ -105,8 +103,6 @@ clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &
 
 #pragma omp parallel for schedule(dynamic)
   for (int k = initial_k; k <= max_k; ++k) {
-    // std::cout << "Calculating k = " << k << std::endl;
-    // printf("Calculating k = %d\n", k);
     std::vector<cluster> clusters = calculate(data, k, evaluation_metric, distance_metric);
     evaluation_result score = evaluation::evaluate(clusters);
 
@@ -114,24 +110,6 @@ clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &
     all_clusters[k - initial_k] = clusters;
   }
 
-  // find_elbow_index(k_to_score_map);
   int best_k = elbow_calculator::find_elbow_index(scores);
-
-  // int x1 = initial_k, x2 = max_k;
-  // double y1 = k_to_score_map[x1], y2 = k_to_score_map[x2];
-
-  // int best_k = initial_k;
-  // double max_distance = std::numeric_limits<double>::min();
-
-  // for (int k = initial_k; k <= max_k; ++k) {
-  //   double y = k_to_score_map[k];
-  //   double dist = distance_calculator::point_line_euclidean_distance(k, y, x1, y1, x2, y2);
-
-  //   if (dist > max_distance) {
-  //     max_distance = dist;
-  //     best_k = k;
-  //   }
-  // }
-
   return clusterization_result(all_clusters[best_k]);
 }

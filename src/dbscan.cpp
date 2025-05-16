@@ -141,66 +141,22 @@ std::vector<double> dbscan::compute_k_distances(const std::vector<std::vector<do
 
 clusterization_result dbscan::calculate(const std::vector<datapoint> &data, distance_metric metric) {
   const int min_points = data[0].size() + 1;
-
-  // std::cout << "Calculating DBSCAN with min_points = " << min_points << std::endl;
   std::vector<std::vector<double>> distance_matrix = distance_calculator::calculate(data, data, metric);
-
-  // std::cout << "Distance matrix:" << std::endl;
-  // logger::print(distance_matrix);
-  // std::cout << std::endl;
 
   std::vector<double> k_distances = compute_k_distances(distance_matrix, min_points - 1);
   int elbow_idx = elbow_calculator::find_elbow_index(k_distances);
   double min_distance = k_distances[elbow_idx] + 0.001;
   // double min_distance = k_distances[elbow_idx] + 0.0001;
-  // std::cout << "min_distance:" << min_distance << std::endl;
 
   std::vector<std::vector<int>> neighbors = get_neighbors(data, distance_matrix, min_distance);
-  // std::cout << "neighbors:" << std::endl;
-  // logger::print(neighbors);
-  // for (int i = 0; i < neighbors.size(); ++i) {
-  // std::cout << i << ": ";
-  // logger::print(neighbors[i]);
-  // }
-  // std::cout << std::endl;
-
   int random_core_point_index = get_random_core_point_index(neighbors, min_points);
   if (random_core_point_index == -1) {
     return clusterization_result({}, data);
   }
-  // std::cout << "Random core point index: " << random_core_point_index << std::endl;
 
   std::vector<int> labels = label_points(data, neighbors, min_points, random_core_point_index);
-  // std::cout << "Labels:" << std::endl;
-  // logger::print(labels);
-  // std::cout << std::endl;
-
   std::vector<datapoint> clusters(labels.size());
   clusterization_result result = labels_to_clusters(data, labels);
-  // std::cout << "Clusters:" << std::endl;
-  // logger::print(result);
-  // std::cout << std::endl;
 
   return result;
 }
-
-// clusterization_result dbscan::calculate(const std::vector<datapoint> &data) {
-//   const int min_points = 3;
-//   const double min_distance = 0.2;
-
-//   std::vector<std::vector<double>> distance_matrix = distance_calculator::squared_euclidean(data, data);
-
-//   std::vector<std::vector<int>> neighbors = get_neighbors(data, distance_matrix, min_distance);
-
-//   int random_core_point_index = get_random_core_point_index(neighbors, min_points);
-//   if (random_core_point_index == -1) {
-//     return clusterization_result({}, data);
-//   }
-
-//   std::vector<int> labels = label_points(data, neighbors, min_points, random_core_point_index);
-
-//   std::vector<datapoint> clusters(labels.size());
-//   clusterization_result result = labels_to_clusters(data, labels);
-
-//   return result;
-// }
