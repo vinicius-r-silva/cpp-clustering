@@ -28,6 +28,9 @@ double evaluation::calculate_within_cluster_sum_of_squares(const std::vector<clu
   for (int i = 0; i < k; ++i) {
     const cluster &cluster = clusters[i];
     double wcss = 0.0;
+    if (cluster.centroid.size() == 0)
+      continue;
+
     for (const datapoint &point : cluster.data) {
       wcss += distance_calculator::euclidean(point, cluster.centroid);
     }
