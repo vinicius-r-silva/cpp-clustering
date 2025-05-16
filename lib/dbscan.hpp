@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cluster.hpp"
+#include "distance_calculator.hpp"
 #include "global.hpp"
 #include <vector>
 
@@ -21,5 +22,5 @@ private:
 
 public:
   // std::vector<cluster> calculate(const std::vector<datapoint> &data);
-  clusterization_result calculate(const std::vector<datapoint> &data);
+  clusterization_result calculate(const std::vector<datapoint> &data, distance_metric metric = distance_metric::SQUARED_EUCLIDEAN);
 };

@@ -1,5 +1,6 @@
 #include "kmeans_plus_plus.hpp"
 #include "distance_calculator.hpp"
+#include "elbow_calculator.hpp"
 #include "logger.hpp"
 #include <algorithm>
 #include <cmath>
@@ -22,7 +23,7 @@ datapoint kmeans_plus_plus::get_initial_centroid(const std::vector<datapoint> &d
   return centroid;
 }
 
-std::vector<datapoint> kmeans_plus_plus::get_initial_centroids(const std::vector<datapoint> &data, const int k) {
+std::vector<datapoint> kmeans_plus_plus::get_initial_centroids(const std::vector<datapoint> &data, const int k, distance_metric distance_metric) {
   int n = data.size();
   int d = data[0].size();
   std::vector<datapoint> centroids;
@@ -34,7 +35,7 @@ std::vector<datapoint> kmeans_plus_plus::get_initial_centroids(const std::vector
     std::vector<double> distances(n, 0.0);
 
     for (int j = 0; j < n; ++j) {
-      std::vector<double> centroid_distances = distance_calculator::squared_euclidean(data[j], centroids);
+      std::vector<double> centroid_distances = distance_calculator::calculate(data[j], centroids, distance_metric);
       double min_distance = *std::min_element(centroid_distances.begin(), centroid_distances.end());
       distances[j] = min_distance;
       total_distance += min_distance;
@@ -55,11 +56,11 @@ std::vector<datapoint> kmeans_plus_plus::get_initial_centroids(const std::vector
   return centroids;
 }
 
-std::vector<std::vector<datapoint>> kmeans_plus_plus::get_multiple_initial_centroids(const std::vector<datapoint> &data, const int k) {
+std::vector<std::vector<datapoint>> kmeans_plus_plus::get_multiple_initial_centroids(const std::vector<datapoint> &data, const int k, distance_metric distance_metric) {
   std::vector<std::vector<datapoint>> initial_centroids;
   for (int i = 0; initial_centroids.size() < ATTEMPTS_PER_K_VALUE && i < MAX_ITERATIONS; ++i) {
 
-    std::vector<datapoint> new_initial_centroids = kmeans_plus_plus::get_initial_centroids(data, k);
+    std::vector<datapoint> new_initial_centroids = kmeans_plus_plus::get_initial_centroids(data, k, distance_metric);
     if (std::find(initial_centroids.begin(), initial_centroids.end(), new_initial_centroids) != initial_centroids.end())
       continue;
 
@@ -69,11 +70,11 @@ std::vector<std::vector<datapoint>> kmeans_plus_plus::get_multiple_initial_centr
   return initial_centroids;
 }
 
-std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &data, const int k, evaluation_metric metric) {
+std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &data, const int k, evaluation_metric evaluation_metric, distance_metric distance_metric) {
   evaluation_result best_score = evaluation_result();
   std::vector<cluster> best_clusters;
 
-  std::vector<std::vector<datapoint>> initial_centroids = get_multiple_initial_centroids(data, k);
+  std::vector<std::vector<datapoint>> initial_centroids = get_multiple_initial_centroids(data, k, distance_metric);
 
   int i = 0;
   for (const std::vector<datapoint> &initial_centroids : initial_centroids) {
@@ -81,7 +82,7 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
     std::vector<cluster> clusters = kmeans_calculator.calculate(data, initial_centroids);
     evaluation_result score = evaluation::evaluate(clusters);
 
-    if (score.compare(best_score, metric) == evaluation_compare::BETTER) {
+    if (score.compare(best_score, evaluation_metric) == evaluation_compare::BETTER) {
       best_score = score;
       best_clusters = clusters;
     }
@@ -90,40 +91,47 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
   return best_clusters;
 }
 
-clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &data) {
-  evaluation_metric metric = evaluation_metric::WITHIN_CLUSTER_SUM_OF_SQUARES;
-  std::unordered_map<int, double> k_to_score_map;
-  std::unordered_map<int, std::vector<cluster>> k_to_cluster_map;
+clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &data, distance_metric distance_metric) {
+  evaluation_metric evaluation_metric = evaluation_metric::WITHIN_CLUSTER_SUM_OF_SQUARES;
+  // std::unordered_map<int, double> k_to_score_map;
+  // std::unordered_map<int, std::vector<cluster>> k_to_cluster_map;
 
   const int initial_k = 1;
   const int max_k = std::sqrt(data.size() / 2);
+  const int k_range = max_k - initial_k + 1;
+
+  std::vector<double> scores(k_range);
+  std::vector<std::vector<cluster>> all_clusters(k_range, std::vector<cluster>());
 
 #pragma omp parallel for schedule(dynamic)
   for (int k = initial_k; k <= max_k; ++k) {
     // std::cout << "Calculating k = " << k << std::endl;
     // printf("Calculating k = %d\n", k);
-    std::vector<cluster> clusters = calculate(data, k, metric);
+    std::vector<cluster> clusters = calculate(data, k, evaluation_metric, distance_metric);
     evaluation_result score = evaluation::evaluate(clusters);
 
-    k_to_score_map[k] = score.get_value(metric);
-    k_to_cluster_map[k] = clusters;
+    scores[k - initial_k] = score.get_value(evaluation_metric);
+    all_clusters[k - initial_k] = clusters;
   }
 
-  int x1 = initial_k, x2 = max_k;
-  double y1 = k_to_score_map[x1], y2 = k_to_score_map[x2];
+  // find_elbow_index(k_to_score_map);
+  int best_k = elbow_calculator::find_elbow_index(scores);
 
-  int best_k = initial_k;
-  double max_distance = std::numeric_limits<double>::min();
+  // int x1 = initial_k, x2 = max_k;
+  // double y1 = k_to_score_map[x1], y2 = k_to_score_map[x2];
 
-  for (int k = initial_k; k <= max_k; ++k) {
-    double y = k_to_score_map[k];
-    double dist = distance_calculator::point_line_euclidean_distance(k, y, x1, y1, x2, y2);
+  // int best_k = initial_k;
+  // double max_distance = std::numeric_limits<double>::min();
 
-    if (dist > max_distance) {
-      max_distance = dist;
-      best_k = k;
-    }
-  }
+  // for (int k = initial_k; k <= max_k; ++k) {
+  //   double y = k_to_score_map[k];
+  //   double dist = distance_calculator::point_line_euclidean_distance(k, y, x1, y1, x2, y2);
 
-  return clusterization_result(k_to_cluster_map[best_k]);
+  //   if (dist > max_distance) {
+  //     max_distance = dist;
+  //     best_k = k;
+  //   }
+  // }
+
+  return clusterization_result(all_clusters[best_k]);
 }

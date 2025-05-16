@@ -16,11 +16,12 @@ int main() {
   naive_kmeans naive_kmeans;
   kmeans_plus_plus kmeans_plus_plus;
   dbscan dbscan;
-  std::vector<datapoint> data = input_generator::generate_pure_random_data(n, d);
+  // std::vector<datapoint> data = input_generator::generate_pure_random_data(n, d);
   // std::vector<datapoint> data = input_generator::generate_gaussian_clusters(n, d);
   // std::vector<datapoint> data = input_generator::generate_linear_separable(n, d);
+  std::vector<datapoint> data = input_generator::generate_cosine_clusters(n, d);
 
-  std::cout << "Data points:" << std::endl;
+    std::cout << "Data points:" << std::endl;
   logger::print(data);
   std::cout << std::endl;
 

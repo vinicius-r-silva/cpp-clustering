@@ -1,4 +1,5 @@
 #include "elbow_calculator.hpp"
+#include "distance_calculator.hpp"
 #include <cmath>
 #include <vector>
 
@@ -14,9 +15,7 @@ int elbow_calculator::find_elbow_index(const std::vector<double> &values) {
     double x0 = i;
     double y0 = values[i];
 
-    double numerator = std::abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1);
-    double denominator = std::sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
-    double dist = numerator / denominator;
+    double dist = distance_calculator::point_line_euclidean_distance(x0, y0, x1, y1, x2, y2);
 
     if (dist > max_dist) {
       max_dist = dist;

@@ -139,11 +139,11 @@ std::vector<double> dbscan::compute_k_distances(const std::vector<std::vector<do
   return k_distances;
 }
 
-clusterization_result dbscan::calculate(const std::vector<datapoint> &data) {
+clusterization_result dbscan::calculate(const std::vector<datapoint> &data, distance_metric metric) {
   const int min_points = data[0].size() + 1;
 
   // std::cout << "Calculating DBSCAN with min_points = " << min_points << std::endl;
-  std::vector<std::vector<double>> distance_matrix = distance_calculator::squared_euclidean(data, data);
+  std::vector<std::vector<double>> distance_matrix = distance_calculator::calculate(data, data, metric);
 
   // std::cout << "Distance matrix:" << std::endl;
   // logger::print(distance_matrix);
