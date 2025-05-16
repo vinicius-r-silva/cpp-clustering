@@ -3,6 +3,7 @@
 #include "logger.hpp"
 #include <cmath>
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 double evaluation::calculate_silhouette_score(const std::vector<cluster> &clusters) {
@@ -79,7 +80,7 @@ evaluation_result evaluation::evaluate(const std::vector<cluster> &clusters) {
   double silhouette_score = calculate_silhouette_score(clusters);
   double wcss = calculate_within_cluster_sum_of_squares(clusters);
 
-  evaluation_result result = evaluation_result(dunn_index, silhouette_score, davies_bouldin_index, calinski_harabasz_index, wcss);
+  evaluation_result result = evaluation_result(silhouette_score, wcss);
   return result;
 }
 
@@ -88,7 +89,7 @@ double evaluation::evaluate(const std::vector<cluster> &clusters, evaluation_met
 }
 
 evaluation_result::evaluation_result()
-    : dunn_index(std::numeric_limits<double>::min()), silhouette_score(std::numeric_limits<double>::min()), davies_bouldin_index(std::numeric_limits<double>::max()), calinski_harabasz_index(std::numeric_limits<double>::min()), within_cluster_sum_of_squares(std::numeric_limits<double>::max()) {}
+    : silhouette_score(std::numeric_limits<double>::min()), within_cluster_sum_of_squares(std::numeric_limits<double>::max()) {}
 
 evaluation_result::evaluation_result(double silhouette_score, double within_cluster_sum_of_squares)
     : silhouette_score(silhouette_score), within_cluster_sum_of_squares(within_cluster_sum_of_squares) {}

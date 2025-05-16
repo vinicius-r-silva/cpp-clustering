@@ -56,9 +56,6 @@ void logger::print(const clusterization_result &result) {
 }
 
 void logger::print(const evaluation_result &result) {
-  std::cout << "Dunn Index: " << result.dunn_index << std::endl;
   std::cout << "Silhouette Score: " << result.silhouette_score << std::endl;
-  std::cout << "Davies-Bouldin Index: " << result.davies_bouldin_index << std::endl;
-  std::cout << "Calinski-Harabasz Index: " << result.calinski_harabasz_index << std::endl;
   std::cout << "Within Cluster Sum of Squares (WCSS): " << result.within_cluster_sum_of_squares << std::endl;
 }
