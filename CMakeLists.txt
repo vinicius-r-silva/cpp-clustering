@@ -15,6 +15,7 @@ set(SOURCES
   src/cluster.cpp
   src/evaluation.cpp
   src/dbscan.cpp
+  src/elbow_calculator.cpp
   src/kmeans/kmeans.cpp
   src/kmeans/naive_kmeans.cpp
   src/kmeans/kmeans_plus_plus.cpp

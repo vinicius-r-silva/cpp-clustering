@@ -17,6 +17,7 @@ private:
   std::vector<int> label_core_points(const std::vector<datapoint> &data, std::vector<std::vector<int>> neighbors, const int min_points, const int initial_core_point_index);
   clusterization_result labels_to_clusters(const std::vector<datapoint> &data, const std::vector<int> &labels);
   std::vector<int> label_points(const std::vector<datapoint> &data, std::vector<std::vector<int>> neighbors, const int min_points, const int initial_core_point_index);
+  std::vector<double> compute_k_distances(const std::vector<std::vector<double>> &distance_matrix, int k);
 
 public:
   // std::vector<cluster> calculate(const std::vector<datapoint> &data);

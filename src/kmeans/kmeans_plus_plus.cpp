@@ -98,8 +98,10 @@ clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &
   const int initial_k = 1;
   const int max_k = std::sqrt(data.size() / 2);
 
+#pragma omp parallel for schedule(dynamic)
   for (int k = initial_k; k <= max_k; ++k) {
-    std::cout << "Calculating k = " << k << std::endl;
+    // std::cout << "Calculating k = " << k << std::endl;
+    printf("Calculating k = %d\n", k);
     std::vector<cluster> clusters = calculate(data, k, metric);
     evaluation_result score = evaluation::evaluate(clusters);
 

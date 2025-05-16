@@ -11,7 +11,7 @@
 #include <vector>
 
 int main() {
-  const int n = 50000;
+  const int n = 50;
   const int d = 2;
   naive_kmeans naive_kmeans;
   kmeans_plus_plus kmeans_plus_plus;
