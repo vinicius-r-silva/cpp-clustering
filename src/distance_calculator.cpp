@@ -22,6 +22,15 @@ std::vector<double> distance_calculator::squared_euclidean(const datapoint &refe
   }
   return distances;
 }
+std::vector<std::vector<double>> distance_calculator::squared_euclidean(const std::vector<datapoint> &points1, const std::vector<datapoint> &points2) {
+  std::vector<std::vector<double>> distances(points1.size(), std::vector<double>(points2.size()));
+  for (size_t i = 0; i < points1.size(); ++i) {
+    for (size_t j = 0; j < points2.size(); ++j) {
+      distances[i][j] = squared_euclidean(points1[i], points2[j]);
+    }
+  }
+  return distances;
+}
 
 double distance_calculator::point_line_euclidean_distance(int x, double y, int x1, double y1, int x2, double y2) {
   double numerator = std::abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1);

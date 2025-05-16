@@ -9,5 +9,6 @@ public:
   static double squared_euclidean(const datapoint &point1, const datapoint &point2);
   static double euclidean(const datapoint &point1, const datapoint &point2);
   static std::vector<double> squared_euclidean(const datapoint &reference, const std::vector<datapoint> &points);
+  static std::vector<std::vector<double>> squared_euclidean(const std::vector<datapoint> &points1, const std::vector<datapoint> &points2);
   static double point_line_euclidean_distance(int x, double y, int x1, double y1, int x2, double y2);
 };

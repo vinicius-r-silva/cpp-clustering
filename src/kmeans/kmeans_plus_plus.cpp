@@ -3,6 +3,7 @@
 #include "logger.hpp"
 #include <algorithm>
 #include <cmath>
+#include <omp.h>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -73,8 +74,10 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
   std::vector<cluster> best_clusters;
 
   std::vector<std::vector<datapoint>> initial_centroids = get_multiple_initial_centroids(data, k);
-  for (const std::vector<datapoint> &initial_centroids : initial_centroids) {
 
+  int i = 0;
+  for (const std::vector<datapoint> &initial_centroids : initial_centroids) {
+    // std::cout << "attempt " << i++ << std::endl;
     std::vector<cluster> clusters = kmeans_calculator.calculate(data, initial_centroids);
     evaluation_result score = evaluation::evaluate(clusters);
 
@@ -94,7 +97,10 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
 
   const int initial_k = 1;
   const int max_k = std::sqrt(data.size() / 2);
+
+#pragma omp parallel for
   for (int k = initial_k; k <= max_k; ++k) {
+    std::cout << "Calculating k = " << k << std::endl;
     std::vector<cluster> clusters = calculate(data, k, metric);
     evaluation_result score = evaluation::evaluate(clusters);
 
