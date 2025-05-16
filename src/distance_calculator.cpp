@@ -1,6 +1,8 @@
 #include "distance_calculator.hpp"
 #include <cmath>
 #include <cstddef>
+#include <iostream>
+#include <omp.h>
 
 double distance_calculator::squared_euclidean(const datapoint &point1, const datapoint &point2) {
   double sum = 0.0;
@@ -22,11 +24,22 @@ std::vector<double> distance_calculator::squared_euclidean(const datapoint &refe
   }
   return distances;
 }
+
 std::vector<std::vector<double>> distance_calculator::squared_euclidean(const std::vector<datapoint> &points1, const std::vector<datapoint> &points2) {
+  bool is_symmetric = &points1 == &points2;
   std::vector<std::vector<double>> distances(points1.size(), std::vector<double>(points2.size()));
+
+#pragma omp parallel for schedule(dynamic, 1)
   for (size_t i = 0; i < points1.size(); ++i) {
-    for (size_t j = 0; j < points2.size(); ++j) {
-      distances[i][j] = squared_euclidean(points1[i], points2[j]);
+    if (is_symmetric) {
+      for (size_t j = i + 1; j < points2.size(); ++j) {
+        distances[i][j] = squared_euclidean(points1[i], points2[j]);
+        distances[j][i] = distances[i][j];
+      }
+    } else {
+      for (size_t j = 0; j < points2.size(); ++j) {
+        distances[i][j] = squared_euclidean(points1[i], points2[j]);
+      }
     }
   }
   return distances;

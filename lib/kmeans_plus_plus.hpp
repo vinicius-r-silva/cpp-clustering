@@ -15,5 +15,5 @@ private:
 
 public:
   std::vector<cluster> calculate(const std::vector<datapoint> &data, const int k, evaluation_metric metric);
-  std::vector<cluster> calculate(const std::vector<datapoint> &data);
+  clusterization_result calculate(const std::vector<datapoint> &data);
 };

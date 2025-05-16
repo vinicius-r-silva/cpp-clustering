@@ -45,7 +45,7 @@ evaluation_result evaluation::evaluate(const std::vector<cluster> &clusters) {
   double wcss = calculate_within_cluster_sum_of_squares(clusters);
 
   evaluation_result result = evaluation_result(dunn_index, silhouette_score, davies_bouldin_index, calinski_harabasz_index, wcss);
-  // logger::print_evaluation(result);
+  // logger::print(result);
   return result;
 }
 

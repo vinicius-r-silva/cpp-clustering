@@ -12,5 +12,5 @@ private:
   std::vector<datapoint> get_random_centroids(const std::vector<datapoint> &data, int k);
 
 public:
-  std::vector<cluster> calculate(const std::vector<datapoint> &data);
+  clusterization_result calculate(const std::vector<datapoint> &data);
 };

@@ -26,8 +26,9 @@ std::vector<datapoint> naive_kmeans::get_random_centroids(const std::vector<data
   return centroids;
 }
 
-std::vector<cluster> naive_kmeans::calculate(const std::vector<datapoint> &data) {
+clusterization_result naive_kmeans::calculate(const std::vector<datapoint> &data) {
   const int k = std::sqrt(data.size() / 2);
   std::vector<datapoint> centroids = get_random_centroids(data, k);
-  return kmeans_calculator.calculate(data, centroids);
+  std::vector<cluster> result = kmeans_calculator.calculate(data, centroids);
+  return clusterization_result(result);
 }

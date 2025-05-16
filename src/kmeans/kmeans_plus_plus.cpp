@@ -90,7 +90,7 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
   return best_clusters;
 }
 
-std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &data) {
+clusterization_result kmeans_plus_plus::calculate(const std::vector<datapoint> &data) {
   evaluation_metric metric = evaluation_metric::WITHIN_CLUSTER_SUM_OF_SQUARES;
   std::unordered_map<int, double> k_to_score_map;
   std::unordered_map<int, std::vector<cluster>> k_to_cluster_map;
@@ -98,7 +98,6 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
   const int initial_k = 1;
   const int max_k = std::sqrt(data.size() / 2);
 
-#pragma omp parallel for
   for (int k = initial_k; k <= max_k; ++k) {
     std::cout << "Calculating k = " << k << std::endl;
     std::vector<cluster> clusters = calculate(data, k, metric);
@@ -124,5 +123,5 @@ std::vector<cluster> kmeans_plus_plus::calculate(const std::vector<datapoint> &d
     }
   }
 
-  return k_to_cluster_map[best_k];
+  return clusterization_result(k_to_cluster_map[best_k]);
 }
