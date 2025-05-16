@@ -21,7 +21,7 @@ int main() {
   // std::vector<datapoint> data = input_generator::generate_linear_separable(n, d);
   std::vector<datapoint> data = input_generator::generate_cosine_clusters(n, d);
 
-    std::cout << "Data points:" << std::endl;
+  std::cout << "Data points:" << std::endl;
   logger::print(data);
   std::cout << std::endl;
 

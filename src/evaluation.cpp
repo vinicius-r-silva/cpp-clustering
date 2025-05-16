@@ -5,20 +5,55 @@
 #include <iostream>
 #include <vector>
 
-double evaluation::calculate_dunn_index(const std::vector<cluster> &clusters) {
-  return 0;
-}
-
 double evaluation::calculate_silhouette_score(const std::vector<cluster> &clusters) {
-  return 0;
-}
+  std::vector<double> silhouette_scores;
 
-double evaluation::calculate_davies_bouldin_index(const std::vector<cluster> &clusters) {
-  return 0;
-}
+  for (int i = 0; i < clusters.size(); ++i) {
+    const cluster &current_cluster = clusters[i];
 
-double evaluation::calculate_calinski_harabasz_index(const std::vector<cluster> &clusters) {
-  return 0;
+    for (const datapoint &point : current_cluster.data) {
+      double a = 0.0;
+      int same_cluster_count = 0;
+
+      for (const datapoint &other : current_cluster.data) {
+        if (&point != &other) {
+          a += distance_calculator::euclidean(point, other);
+          ++same_cluster_count;
+        }
+      }
+
+      if (same_cluster_count > 0)
+        a /= same_cluster_count;
+
+      double b = std::numeric_limits<double>::max();
+
+      for (int j = 0; j < clusters.size(); ++j) {
+        if (j == i || clusters[j].data.empty())
+          continue;
+
+        double distance_sum = 0.0;
+        for (const datapoint &other : clusters[j].data) {
+          distance_sum += distance_calculator::euclidean(point, other);
+        }
+
+        double mean_distance = distance_sum / clusters[j].data.size();
+        if (mean_distance < b)
+          b = mean_distance;
+      }
+
+      double s = 0.0;
+      if (std::max(a, b) > 0.0)
+        s = (b - a) / std::max(a, b);
+
+      silhouette_scores.push_back(s);
+    }
+  }
+
+  if (silhouette_scores.empty())
+    return 0.0;
+
+  double total_score = std::accumulate(silhouette_scores.begin(), silhouette_scores.end(), 0.0);
+  return total_score / silhouette_scores.size();
 }
 
 double evaluation::calculate_within_cluster_sum_of_squares(const std::vector<cluster> &clusters) {
@@ -41,14 +76,10 @@ double evaluation::calculate_within_cluster_sum_of_squares(const std::vector<clu
 }
 
 evaluation_result evaluation::evaluate(const std::vector<cluster> &clusters) {
-  double dunn_index = calculate_dunn_index(clusters);
   double silhouette_score = calculate_silhouette_score(clusters);
-  double davies_bouldin_index = calculate_davies_bouldin_index(clusters);
-  double calinski_harabasz_index = calculate_calinski_harabasz_index(clusters);
   double wcss = calculate_within_cluster_sum_of_squares(clusters);
 
   evaluation_result result = evaluation_result(dunn_index, silhouette_score, davies_bouldin_index, calinski_harabasz_index, wcss);
-  // logger::print(result);
   return result;
 }
 
@@ -56,24 +87,16 @@ double evaluation::evaluate(const std::vector<cluster> &clusters, evaluation_met
   return evaluate(clusters).get_value(metric);
 }
 
-// TODO split this into multiple files
 evaluation_result::evaluation_result()
     : dunn_index(std::numeric_limits<double>::min()), silhouette_score(std::numeric_limits<double>::min()), davies_bouldin_index(std::numeric_limits<double>::max()), calinski_harabasz_index(std::numeric_limits<double>::min()), within_cluster_sum_of_squares(std::numeric_limits<double>::max()) {}
 
-evaluation_result::evaluation_result(double dunn_index, double silhouette_score, double davies_bouldin_index, double calinski_harabasz_index, double within_cluster_sum_of_squares)
-    : dunn_index(dunn_index), silhouette_score(silhouette_score), davies_bouldin_index(davies_bouldin_index), calinski_harabasz_index(calinski_harabasz_index), within_cluster_sum_of_squares(within_cluster_sum_of_squares) {}
+evaluation_result::evaluation_result(double silhouette_score, double within_cluster_sum_of_squares)
+    : silhouette_score(silhouette_score), within_cluster_sum_of_squares(within_cluster_sum_of_squares) {}
 
 double evaluation_result::get_value(evaluation_metric metric) const {
-  // change to strategy pattern
   switch (metric) {
-  case DUMM_INDEX:
-    return dunn_index;
   case SILHOUET_SCORE:
     return silhouette_score;
-  case DAVIES_BOULDIN_INDEX:
-    return davies_bouldin_index;
-  case CALINSKI_HARABASZ_INDEX:
-    return calinski_harabasz_index;
   case WITHIN_CLUSTER_SUM_OF_SQUARES:
     return within_cluster_sum_of_squares;
   default:
@@ -86,12 +109,9 @@ evaluation_compare evaluation_result::compare(const evaluation_result &other, ev
   double other_value = other.get_value(metric);
 
   switch (metric) {
-  case DUMM_INDEX:
   case SILHOUET_SCORE:
-  case CALINSKI_HARABASZ_INDEX:
     return this_value > other_value ? BETTER : (this_value < other_value ? WORSE : EQUAL);
 
-  case DAVIES_BOULDIN_INDEX:
   case WITHIN_CLUSTER_SUM_OF_SQUARES:
     return this_value < other_value ? BETTER : (this_value > other_value ? WORSE : EQUAL);
 

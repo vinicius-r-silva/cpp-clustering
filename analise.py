@@ -58,7 +58,7 @@ def plot_clusters(title, filename, all_points, clusters, outliers):
     if outliers:
         plt.scatter(*zip(*outliers), color='red', marker='x', s=100)
 
-    plt.scatter(*zip(*all_points), facecolors='none', edgecolors='gray', alpha=0.3)
+    plt.scatter(*zip(*all_points), facecolors='none', alpha=0.3)
 
     plt.title(title)
     plt.xlabel('X')
