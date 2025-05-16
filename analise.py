@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import re
-from matplotlib.cm import get_cmap
+from matplotlib.colors import hsv_to_rgb
+import numpy as np
+
 
 # Paste your clustering output here
 raw_output = ""
@@ -16,7 +18,7 @@ def extract_points(block):
     ]
 
 def extract_clusters(section_name, text):
-    section = re.search(rf"{section_name}.*?Clusters:(.*?)(?:Outliers:|Evaluation:|$)", text, re.DOTALL)
+    section = re.search(rf"{section_name}.*?Clusters:(.*?)(?:Naive Kmeans|Kmeans plus plus|dbscan|Evaluation:|$)", text, re.DOTALL | re.IGNORECASE)
     if not section:
         return {}, []
 
@@ -30,7 +32,7 @@ def extract_clusters(section_name, text):
         points = extract_points(match.group(2))
         clusters[cluster_id] = points
 
-    outlier_match = re.search(rf"{section_name}.*?Outliers:(.*?)(?:Evaluation:|$)", text, re.DOTALL)
+    outlier_match = re.search(rf"{section_name}.*?Outliers:(.*?)(?:Naive Kmeans|Kmeans plus plus|dbscan|Evaluation:|$)", text, re.DOTALL | re.IGNORECASE)
     if outlier_match:
         outlier_block = outlier_match.group(1).strip()
         lines = outlier_block.splitlines()
@@ -39,37 +41,44 @@ def extract_clusters(section_name, text):
 
     return clusters, outliers
 
-def plot_clusters(title, all_points, clusters, outliers):
+def generate_distinct_colors(n):
+    hues = np.linspace(0, 1, n, endpoint=False)
+    return [hsv_to_rgb((h, 0.75, 0.9)) for h in hues]
+
+def plot_clusters(title, filename, all_points, clusters, outliers):
     plt.figure(figsize=(8, 6))
     sns.set(style="whitegrid")
-    cmap = get_cmap("tab10")
 
-    for i, (cluster_id, points) in enumerate(clusters.items()):
-        color = cmap(i % 10)
-        plt.scatter(*zip(*points), color=color, label=f'Cluster {cluster_id}')
-    
+    colors = generate_distinct_colors(len(clusters))
+
+    for i, points in enumerate(clusters.values()):
+        color = colors[i]
+        plt.scatter(*zip(*points), color=color)
+
     if outliers:
-        plt.scatter(*zip(*outliers), color='red', marker='x', s=100, label='Outliers')
-    
-    plt.scatter(*zip(*all_points), facecolors='none', edgecolors='gray', alpha=0.3, label='All points')
+        plt.scatter(*zip(*outliers), color='red', marker='x', s=100)
+
+    plt.scatter(*zip(*all_points), facecolors='none', edgecolors='gray', alpha=0.3)
 
     plt.title(title)
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.legend()
     plt.tight_layout()
-    plt.show()
+    plt.savefig(filename, dpi=300)
+    plt.close()
+    print(f"Saved: {filename}")
 
-# Extract data points
-data_section = re.search(r"Data points:(.*?)Kmeans plus plus Clusters:", raw_output, re.DOTALL)
+# === Extract all data points
+data_section = re.search(r"Data points:(.*?)(Naive KMeans|Kmeans plus plus|dbscan)", raw_output, re.DOTALL | re.IGNORECASE)
 all_points = extract_points(data_section.group(1)) if data_section else []
 
-# Extract clusters
-kmeans_clusters, kmeans_outliers = extract_clusters("Kmeans plus plus", raw_output)
-dbscan_clusters, dbscan_outliers = extract_clusters("dbscan", raw_output)
-print("KMeans++ Clusters:", kmeans_clusters)
-print("KMeans++ Outliers:", kmeans_outliers)
+# === Extract each clustering algorithm
+clustering_algos = [
+    ("Naive KMeans", "naive_kmeans.png"),
+    ("Kmeans plus plus", "kmeans_plus_plus.png"),
+    ("dbscan", "dbscan.png")
+]
 
-# Plot each clustering result in a separate figure
-plot_clusters("KMeans++ Clustering", all_points, kmeans_clusters, kmeans_outliers)
-plot_clusters("DBSCAN Clustering", all_points, dbscan_clusters, dbscan_outliers)
+for algo_name, filename in clustering_algos:
+    clusters, outliers = extract_clusters(algo_name, raw_output)
+    plot_clusters(algo_name, filename, all_points, clusters, outliers)

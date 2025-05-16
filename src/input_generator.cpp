@@ -1,4 +1,5 @@
 #include "input_generator.hpp"
+#include <cmath>
 #include <cstdlib>
 
 std::vector<datapoint> input_generator::generate_pure_random_data(int n, int d) {
@@ -11,8 +12,13 @@ std::vector<datapoint> input_generator::generate_pure_random_data(int n, int d) 
   return data;
 }
 
-std::vector<datapoint> input_generator::generate_gaussian_clusters(int n, int d, int k, double spread = 0.1) {
+std::vector<datapoint> input_generator::generate_gaussian_clusters(int n, int d, int k, double spread) {
   std::vector<datapoint> data;
+
+  if (k == 0) {
+    k = rand() % ((int)std::sqrt(n));
+  }
+
   std::vector<datapoint> centers(k, datapoint(d));
   for (auto &center : centers) {
     for (int i = 0; i < d; ++i)

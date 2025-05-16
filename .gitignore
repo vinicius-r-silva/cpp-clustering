@@ -13,3 +13,6 @@ CMakeUserPresets.json
 .vscode
 build
 output.txt
+dbscan.png
+kmeans_plus_plus.png
+naive_kmeans.png

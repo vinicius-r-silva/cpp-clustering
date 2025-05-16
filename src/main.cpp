@@ -11,20 +11,22 @@
 #include <vector>
 
 int main() {
-  const int n = 5000;
+  const int n = 500;
   const int d = 2;
   naive_kmeans naive_kmeans;
   kmeans_plus_plus kmeans_plus_plus;
   dbscan dbscan;
   std::vector<datapoint> data = input_generator::generate_pure_random_data(n, d);
+  // std::vector<datapoint> data = input_generator::generate_gaussian_clusters(n, d);
+  // std::vector<datapoint> data = input_generator::generate_linear_separable(n, d);
 
   std::cout << "Data points:" << std::endl;
   logger::print(data);
   std::cout << std::endl;
 
-  // clusterization_result naive_kmeans_result = naive_kmeans.calculate(data); // Fit the kmeans model to the data
-  // std::cout << "Naive KMeans Clusters:" << std::endl;
-  // logger::print(naive_kmeans_result);
+  clusterization_result naive_kmeans_result = naive_kmeans.calculate(data); // Fit the kmeans model to the data
+  std::cout << "Naive KMeans Clusters:" << std::endl;
+  logger::print(naive_kmeans_result);
 
   std::cout << "Kmeans plus plus Clusters:" << std::endl;
   clusterization_result kmeans_plus_plus_result = kmeans_plus_plus.calculate(data); // Fit the kmeans model to the data
@@ -36,9 +38,9 @@ int main() {
   logger::print(dbscan_result);
   std::cout << std::endl;
 
-  // std::cout << "Naive Kmeans Evaluation:" << std::endl;
-  // evaluation_result naive_kmeans_eval = evaluation::evaluate(naive_kmeans_result.clusters);
-  // logger::print(naive_kmeans_eval);
+  std::cout << "Naive Kmeans Evaluation:" << std::endl;
+  evaluation_result naive_kmeans_eval = evaluation::evaluate(naive_kmeans_result.clusters);
+  logger::print(naive_kmeans_eval);
 
   std::cout << "Kmeans plus plus Evaluation:" << std::endl;
   evaluation_result kmeans_plus_plus_eval = evaluation::evaluate(kmeans_plus_plus_result.clusters);

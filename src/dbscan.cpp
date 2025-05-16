@@ -151,7 +151,7 @@ clusterization_result dbscan::calculate(const std::vector<datapoint> &data) {
 
   std::vector<double> k_distances = compute_k_distances(distance_matrix, min_points - 1);
   int elbow_idx = elbow_calculator::find_elbow_index(k_distances);
-  double min_distance = k_distances[elbow_idx];
+  double min_distance = k_distances[elbow_idx] + 0.001;
   // std::cout << "min_distance:" << min_distance << std::endl;
 
   std::vector<std::vector<int>> neighbors = get_neighbors(data, distance_matrix, min_distance);
