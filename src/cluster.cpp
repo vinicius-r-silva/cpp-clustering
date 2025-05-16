@@ -2,4 +2,4 @@
 
 cluster::cluster() : data(), centroid() {}
 
-cluster::cluster(std::vector<std::vector<double>> data, std::vector<double> centroid) : data(data), centroid(centroid) {}
+cluster::cluster(std::vector<datapoint> data, datapoint centroid) : data(data), centroid(centroid) {}

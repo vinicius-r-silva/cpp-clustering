@@ -1,11 +1,13 @@
 #pragma once
 
+#include "global.hpp"
 #include <vector>
 
 class cluster {
 public:
-  std::vector<std::vector<double>> data;
-  std::vector<double> centroid;
+  std::vector<datapoint> data;
+  datapoint centroid;
+
   cluster();
-  cluster(std::vector<std::vector<double>> data, std::vector<double> centroid);
+  cluster(std::vector<datapoint> data, datapoint centroid);
 };
